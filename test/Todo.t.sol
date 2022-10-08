@@ -31,7 +31,7 @@ contract CounterTest is Test {
         // vm.expectEmit(true, false, false, false);
         // emit TaskAdded(0);
         todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -43,7 +43,7 @@ contract CounterTest is Test {
     function testApprovesTaskCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -54,7 +54,7 @@ contract CounterTest is Test {
     function testAddsAuthorisedCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -71,7 +71,7 @@ contract CounterTest is Test {
     function testRevokesApprovalCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -92,7 +92,7 @@ contract CounterTest is Test {
     function testCannotRevokeApprovalAfterTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -118,7 +118,7 @@ contract CounterTest is Test {
 
         vm.expectRevert("OnlyCreator");
         todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -128,7 +128,7 @@ contract CounterTest is Test {
     function testRemovesAuthorisedCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -155,7 +155,7 @@ contract CounterTest is Test {
     function testCannotApprovefterTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -178,7 +178,7 @@ contract CounterTest is Test {
     function testTaskExecutesSuccesfullyCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -195,7 +195,7 @@ contract CounterTest is Test {
     function testTaskFailsCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -215,7 +215,7 @@ contract CounterTest is Test {
     function testTaskDoesNotExecuteBeforeTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)
@@ -232,7 +232,7 @@ contract CounterTest is Test {
     function testOnlyAllowsCreatorToWithdraw() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            "This is some text",
             address(mockToken),
             10e18,
             address(0x9)

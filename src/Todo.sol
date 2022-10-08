@@ -32,7 +32,7 @@ contract Todo {
     uint256 public required = 1;
 
     struct Task {
-        bytes text;
+        string text;
         uint256 taskId;
         address tokenAddress;
         uint256 amountStaked;
@@ -47,10 +47,10 @@ contract Todo {
     //                Events                 //
     //---------------------------------------//
 
-    event TaskAdded(bytes indexed taskText, uint256 indexed taskId);
+    event TaskAdded(string indexed taskText, uint256 indexed taskId);
 
     event TaskFinished(
-        bytes indexed taskText,
+        string indexed taskText,
         uint256 indexed taskId,
         TaskState indexed state
     );
@@ -105,7 +105,7 @@ contract Todo {
     //---------------------------------------//
 
     function addTask(
-        bytes memory taskText,
+        string memory taskText,
         address _tokenAddress,
         uint256 _amountStaked,
         address _fallbackAddress
@@ -261,7 +261,7 @@ contract Todo {
     function getTaskText(uint256 _taskId)
         public
         view
-        returns (bytes memory taskText)
+        returns (string memory taskText)
     {
         return tasks[_taskId].text;
     }
