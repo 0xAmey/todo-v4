@@ -17,7 +17,6 @@ contract ContractFactory {
         todo = new Todo(msg.sender);
         //required for testing
         storeTodoContracts.push(todo);
-
         userAddressToContractAddress[msg.sender] = address(todo);
     }
 
@@ -25,5 +24,3 @@ contract ContractFactory {
         return userAddressToContractAddress[_user];
     }
 }
-
-//0x1f8a98d10d92e709AE243BB903C9C75bfB38bFc0
