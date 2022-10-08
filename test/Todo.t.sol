@@ -30,7 +30,12 @@ contract CounterTest is Test {
         mockToken.approve(address(todo), 100e18);
         // vm.expectEmit(true, false, false, false);
         // emit TaskAdded(0);
-        todo.addTask("This is a task", address(mockToken), 10e18, address(0x9));
+        todo.addTask(
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            address(mockToken),
+            10e18,
+            address(0x9)
+        );
 
         assertEq(mockToken.balanceOf(address(todo)), 10e18);
     }
@@ -38,7 +43,7 @@ contract CounterTest is Test {
     function testApprovesTaskCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -49,7 +54,7 @@ contract CounterTest is Test {
     function testAddsAuthorisedCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -66,7 +71,7 @@ contract CounterTest is Test {
     function testRevokesApprovalCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -87,7 +92,7 @@ contract CounterTest is Test {
     function testCannotRevokeApprovalAfterTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -100,7 +105,7 @@ contract CounterTest is Test {
 
         assertEq(todo.getApprovalCount(taskId), 2);
 
-        vm.warp(502);
+        vm.warp(88000);
         vm.startPrank(address(0x1));
         vm.expectRevert("Timeover");
         todo.revokeApproval(taskId);
@@ -112,13 +117,18 @@ contract CounterTest is Test {
         mockToken.approve(address(todo), 100e18);
 
         vm.expectRevert("OnlyCreator");
-        todo.addTask("This is a task", address(mockToken), 10e18, address(0x9));
+        todo.addTask(
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
+            address(mockToken),
+            10e18,
+            address(0x9)
+        );
     }
 
     function testRemovesAuthorisedCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -145,17 +155,20 @@ contract CounterTest is Test {
     function testCannotApprovefterTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
         );
-        vm.warp(501);
+
+        console.log(block.timestamp);
+        vm.warp(86402);
+        console.log(block.timestamp);
         vm.expectRevert("Timeover");
         todo.approve(taskId);
     }
 
-    function testonlyCreatorCanUpdateRequire() public {
+    function testOnlyCreatorCanUpdateRequire() public {
         vm.startPrank(address(0x1));
         vm.expectRevert("OnlyCreator");
         todo.updateRequired(2);
@@ -165,7 +178,7 @@ contract CounterTest is Test {
     function testTaskExecutesSuccesfullyCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -173,7 +186,7 @@ contract CounterTest is Test {
 
         assertEq(mockToken.balanceOf(address(todo)), 10e18);
 
-        vm.warp(500);
+        vm.warp(88000);
         todo.userWithdraw(taskId);
 
         assertEq(mockToken.balanceOf(address(todo)), 0);
@@ -182,7 +195,7 @@ contract CounterTest is Test {
     function testTaskFailsCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -192,7 +205,7 @@ contract CounterTest is Test {
 
         assertEq(mockToken.balanceOf(address(todo)), 10e18);
 
-        vm.warp(500);
+        vm.warp(90000);
 
         todo.userWithdraw(taskId);
 
@@ -202,7 +215,7 @@ contract CounterTest is Test {
     function testTaskDoesNotExecuteBeforeTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "this is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -210,7 +223,7 @@ contract CounterTest is Test {
 
         assertEq(mockToken.balanceOf(address(todo)), 10e18);
 
-        vm.warp(100);
+        vm.warp(8640);
 
         vm.expectRevert("NotEnoughTimeElapsed");
         todo.userWithdraw(taskId);
@@ -219,7 +232,7 @@ contract CounterTest is Test {
     function testOnlyAllowsCreatorToWithdraw() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
-            "This is a task",
+            "ipfs://QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4",
             address(mockToken),
             10e18,
             address(0x9)
@@ -227,7 +240,7 @@ contract CounterTest is Test {
 
         assertEq(mockToken.balanceOf(address(todo)), 10e18);
 
-        vm.warp(502);
+        vm.warp(86400);
 
         vm.startPrank(address(0x1));
         vm.expectRevert("OnlyCreator");

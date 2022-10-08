@@ -47,10 +47,12 @@ contract Todo {
     //                Events                 //
     //---------------------------------------//
 
-    event TaskAdded(
+    event TaskAdded(bytes indexed taskText, uint256 indexed taskId);
+
+    event TaskFinished(
         bytes indexed taskText,
-        Task indexed task,
-        uint256 indexed taskId
+        uint256 indexed taskId,
+        TaskState indexed state
     );
 
     //---------------------------------------//
@@ -92,7 +94,7 @@ contract Todo {
 
     modifier timeLeft(uint256 _taskId) {
         require(
-            block.timestamp <= (tasks[_taskId].startTimestamp + 86000),
+            block.timestamp <= (tasks[_taskId].startTimestamp + 86400),
             "Timeover"
         );
         _;
@@ -125,7 +127,7 @@ contract Todo {
         token = IERC20(_tokenAddress);
         token.transferFrom(msg.sender, address(this), _amountStaked);
 
-        emit TaskAdded(taskText, task, taskId);
+        emit TaskAdded(taskText, taskId);
 
         return taskId++;
     }
@@ -155,24 +157,26 @@ contract Todo {
         notExecuted(_taskId)
     {
         require(
-            block.timestamp >= (tasks[_taskId].startTimestamp + 86000),
+            block.timestamp >= (tasks[_taskId].startTimestamp + 86400),
             "NotEnoughTimeElapsed"
         );
         executed[taskId] = true;
         uint256 approvals = getApprovalCount(_taskId);
+        Task memory task = tasks[_taskId];
         if (approvals >= required) {
             tasks[_taskId].state = TaskState.completed;
-            Task memory task = tasks[_taskId];
             IERC20(task.tokenAddress).transfer(
                 authorised[0],
                 task.amountStaked
             );
+            emit TaskFinished(task.text, taskId, TaskState.completed);
         } else {
             tasks[_taskId].state = TaskState.failed;
-            IERC20(tasks[_taskId].tokenAddress).transfer(
-                tasks[_taskId].fallbackAddress,
-                tasks[_taskId].amountStaked
+            IERC20(task.tokenAddress).transfer(
+                task.fallbackAddress,
+                task.amountStaked
             );
+            emit TaskFinished(task.text, taskId, TaskState.failed);
         }
     }
 
