@@ -28,9 +28,9 @@ contract CounterTest is Test {
 
     function testAddsTaskCorrectly() public {
         mockToken.approve(address(todo), 100e18);
-        vm.expectEmit(true, false, false, false);
-        emit TaskAdded(0);
-        todo.addTask(address(mockToken), 10e18, 500, address(0x9));
+        // vm.expectEmit(true, false, false, false);
+        // emit TaskAdded(0);
+        todo.addTask("This is a task", address(mockToken), 10e18, address(0x9));
 
         assertEq(mockToken.balanceOf(address(todo)), 10e18);
     }
@@ -38,9 +38,9 @@ contract CounterTest is Test {
     function testApprovesTaskCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
         assertEq(todo.getApprovalCount(taskId), 1);
@@ -49,9 +49,9 @@ contract CounterTest is Test {
     function testAddsAuthorisedCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
         assertEq(todo.getApprovalCount(taskId), 1);
@@ -66,9 +66,9 @@ contract CounterTest is Test {
     function testRevokesApprovalCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
         assertEq(todo.getApprovalCount(taskId), 1);
@@ -87,9 +87,9 @@ contract CounterTest is Test {
     function testCannotRevokeApprovalAfterTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
         assertEq(todo.getApprovalCount(taskId), 1);
@@ -112,15 +112,15 @@ contract CounterTest is Test {
         mockToken.approve(address(todo), 100e18);
 
         vm.expectRevert("OnlyCreator");
-        todo.addTask(address(mockToken), 10e18, 500, address(0x9));
+        todo.addTask("This is a task", address(mockToken), 10e18, address(0x9));
     }
 
     function testRemovesAuthorisedCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
         todo.addAuthorised(address(0x1));
@@ -145,9 +145,9 @@ contract CounterTest is Test {
     function testCannotApprovefterTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
         vm.warp(501);
@@ -165,9 +165,9 @@ contract CounterTest is Test {
     function testTaskExecutesSuccesfullyCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
 
@@ -182,9 +182,9 @@ contract CounterTest is Test {
     function testTaskFailsCorrectly() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
 
@@ -202,9 +202,9 @@ contract CounterTest is Test {
     function testTaskDoesNotExecuteBeforeTime() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "this is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
 
@@ -219,9 +219,9 @@ contract CounterTest is Test {
     function testOnlyAllowsCreatorToWithdraw() public {
         mockToken.approve(address(todo), 100e18);
         uint256 taskId = todo.addTask(
+            "This is a task",
             address(mockToken),
             10e18,
-            500,
             address(0x9)
         );
 

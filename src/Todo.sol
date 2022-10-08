@@ -4,8 +4,9 @@ pragma solidity ^0.8.13;
 import "openzeppelin/token/ERC20/IERC20.sol";
 
 contract Todo {
-    event TaskAdded(uint256 indexed taskId);
-    event UpdateTaskState(uint256 taskId, TaskState state);
+    //---------------------------------------//
+    //             Assignnments              //
+    //---------------------------------------//
 
     enum TaskState {
         ongoing,
@@ -25,21 +26,36 @@ contract Todo {
     // storing the approvals
     mapping(uint256 => mapping(address => bool)) public approved;
 
-    mapping(uint256 => bool) taskExecution;
+    mapping(uint256 => bool) executed;
 
     // num of approvals required to mark a task
     uint256 public required = 1;
 
     struct Task {
+        bytes text;
         uint256 taskId;
         address tokenAddress;
         uint256 amountStaked;
-        uint256 endTimeStamp;
+        uint256 startTimestamp;
         address fallbackAddress;
         TaskState state;
     }
 
     Task[] public tasks;
+
+    //---------------------------------------//
+    //                Events                 //
+    //---------------------------------------//
+
+    event TaskAdded(
+        bytes indexed taskText,
+        Task indexed task,
+        uint256 indexed taskId
+    );
+
+    //---------------------------------------//
+    //             Constructor               //
+    //---------------------------------------//
 
     constructor(address _sender) {
         authorised.push(_sender);
@@ -49,6 +65,10 @@ contract Todo {
     receive() external payable {}
 
     fallback() external payable {}
+
+    //---------------------------------------//
+    //               Modifiers               //
+    //---------------------------------------//
 
     modifier onlyAuthorised() {
         require(isAuthorised[msg.sender] == true, "NotAuthorised");
@@ -65,36 +85,47 @@ contract Todo {
         _;
     }
 
-    modifier timeLeft(uint256 _taskId) {
-        require(block.timestamp <= tasks[_taskId].endTimeStamp, "Timeover");
+    modifier notExecuted(uint256 _taskId) {
+        require(executed[_taskId] != true, "AlreadyExecuted");
         _;
     }
 
+    modifier timeLeft(uint256 _taskId) {
+        require(
+            block.timestamp <= (tasks[_taskId].startTimestamp + 86000),
+            "Timeover"
+        );
+        _;
+    }
+
+    //---------------------------------------//
+    //             Main Logic                //
+    //---------------------------------------//
+
     function addTask(
+        bytes memory taskText,
         address _tokenAddress,
         uint256 _amountStaked,
-        uint256 _endTimeStamp,
         address _fallbackAddress
     ) public onlyCreator returns (uint256) {
-        tasks.push(
-            Task({
-                taskId: taskId,
-                tokenAddress: _tokenAddress,
-                amountStaked: _amountStaked,
-                endTimeStamp: _endTimeStamp,
-                fallbackAddress: _fallbackAddress,
-                /*creator: msg.sender,*/
-                state: TaskState.ongoing
-            })
-        );
-
-        emit TaskAdded(taskId);
+        Task memory task = Task({
+            text: taskText,
+            taskId: taskId,
+            tokenAddress: _tokenAddress,
+            amountStaked: _amountStaked,
+            startTimestamp: block.timestamp,
+            fallbackAddress: _fallbackAddress,
+            state: TaskState.ongoing
+        });
+        tasks.push(task);
 
         // autmatically approves the task from user address
         approved[taskId][msg.sender] = true;
 
         token = IERC20(_tokenAddress);
         token.transferFrom(msg.sender, address(this), _amountStaked);
+
+        emit TaskAdded(taskText, task, taskId);
 
         return taskId++;
     }
@@ -114,19 +145,20 @@ contract Todo {
         onlyOngoing(_taskId)
         timeLeft(_taskId)
     {
-        require(approved[_taskId][msg.sender], "TxNotApproved");
+        require(approved[_taskId][msg.sender], "TxAlreadyUnapproved");
         approved[_taskId][msg.sender] = false;
     }
 
     function userWithdraw(uint256 _taskId)
         public
         onlyCreator
-        onlyOngoing(_taskId)
+        notExecuted(_taskId)
     {
         require(
-            block.timestamp >= tasks[_taskId].endTimeStamp,
+            block.timestamp >= (tasks[_taskId].startTimestamp + 86000),
             "NotEnoughTimeElapsed"
         );
+        executed[taskId] = true;
         uint256 approvals = getApprovalCount(_taskId);
         if (approvals >= required) {
             tasks[_taskId].state = TaskState.completed;
@@ -149,12 +181,9 @@ contract Todo {
         isAuthorised[_newAuthorised] = true;
     }
 
-    function removeAuthorised(address _removedAuthorised) public onlyCreator {
-        require(
-            isAuthorised[_removedAuthorised] == true &&
-                _removedAuthorised != msg.sender
-        );
-        isAuthorised[_removedAuthorised] = false;
+    function removeAuthorised(address _removeAddr) public onlyCreator {
+        require(isAuthorised[_removeAddr] == true && _removeAddr != msg.sender);
+        isAuthorised[_removeAddr] = false;
     }
 
     function updateRequired(uint256 _newRequired) public onlyCreator {
@@ -221,5 +250,15 @@ contract Todo {
 
     function getNumOfPartners() public view returns (uint256) {
         return authorised.length;
+    }
+
+    // QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4
+
+    function getTaskText(uint256 _taskId)
+        public
+        view
+        returns (bytes memory taskText)
+    {
+        return tasks[_taskId].text;
     }
 }
