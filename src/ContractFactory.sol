@@ -7,16 +7,19 @@ contract ContractFactory {
     event NewTodoContract(uint256 id);
 
     Todo public todo;
-    //required for testing
+
+    // NOTE: Required for testing
     Todo[] public storeTodoContracts;
 
-    //maps the user address to contract address
+    // maps the user address to contract address
     mapping(address => address) public userAddressToContractAddress;
 
     function createTodo() public {
         todo = new Todo(msg.sender);
-        //required for testing
+
+        // NOTE: required for testing
         storeTodoContracts.push(todo);
+
         userAddressToContractAddress[msg.sender] = address(todo);
     }
 

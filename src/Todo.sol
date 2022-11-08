@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: None
 pragma solidity ^0.8.13;
 
-import "openzeppelin/token/ERC20/IERC20.sol";
-
 contract Todo {
     //---------------------------------------//
     //             Assignnments              //
@@ -13,8 +11,6 @@ contract Todo {
         completed,
         failed
     }
-
-    IERC20 public token;
 
     uint256 public taskId = 0;
 
@@ -34,7 +30,6 @@ contract Todo {
     struct Task {
         string text;
         uint256 taskId;
-        address tokenAddress;
         uint256 amountStaked;
         uint256 startTimestamp;
         address fallbackAddress;
@@ -100,32 +95,42 @@ contract Todo {
         _;
     }
 
+    // Utility to transfer native token to an address
+    function transferNativeToken(address payable _to, uint256 _amount)
+        internal
+        returns (bool)
+    {
+        (bool success, ) = _to.call{value: _amount}("");
+
+        require(success, "Transfer failed");
+        return true;
+    }
+
     //---------------------------------------//
     //             Main Logic                //
     //---------------------------------------//
 
     function addTask(
         string memory taskText,
-        address _tokenAddress,
         uint256 _amountStaked,
         address _fallbackAddress
-    ) public onlyCreator returns (uint256) {
+    ) public payable onlyCreator returns (uint256) {
+        require(_amountStaked > 0, "AmountStakedZero");
+        require(_amountStaked == msg.value, "AmountStakedNotEqual");
+
         Task memory task = Task({
             text: taskText,
             taskId: taskId,
-            tokenAddress: _tokenAddress,
             amountStaked: _amountStaked,
             startTimestamp: block.timestamp,
             fallbackAddress: _fallbackAddress,
             state: TaskState.ongoing
         });
+
         tasks.push(task);
 
-        // autmatically approves the task from user address
+        // automatically approves the task from user address
         approved[taskId][msg.sender] = true;
-
-        token = IERC20(_tokenAddress);
-        token.transferFrom(msg.sender, address(this), _amountStaked);
 
         emit TaskAdded(taskText, taskId);
 
@@ -160,22 +165,23 @@ contract Todo {
             block.timestamp >= (tasks[_taskId].startTimestamp + 86400),
             "NotEnoughTimeElapsed"
         );
+
         executed[taskId] = true;
+
         uint256 approvals = getApprovalCount(_taskId);
         Task memory task = tasks[_taskId];
+
         if (approvals >= required) {
             tasks[_taskId].state = TaskState.completed;
-            IERC20(task.tokenAddress).transfer(
-                authorised[0],
-                task.amountStaked
-            );
+
+            transferNativeToken(payable(authorised[0]), task.amountStaked);
+
             emit TaskFinished(task.text, taskId, TaskState.completed);
         } else {
             tasks[_taskId].state = TaskState.failed;
-            IERC20(task.tokenAddress).transfer(
-                task.fallbackAddress,
-                task.amountStaked
-            );
+
+            transferNativeToken(payable(task.fallbackAddress), task.amountStaked);
+
             emit TaskFinished(task.text, taskId, TaskState.failed);
         }
     }
@@ -186,17 +192,19 @@ contract Todo {
     }
 
     function removeAuthorised(address _removeAddr) public onlyCreator {
-        require(isAuthorised[_removeAddr] == true && _removeAddr != msg.sender);
+        require(isAuthorised[_removeAddr] == true && _removeAddr != msg.sender, "NotAuthorised");
+
         isAuthorised[_removeAddr] = false;
     }
 
     function updateRequired(uint256 _newRequired) public onlyCreator {
+        require(_newRequired >= 1, "num approvals not >= 1");
+
         required = _newRequired;
-        require(required >= 1, "NumOfApprovalsShouldBe>=1");
     }
 
     //---------------------------------------//
-    //                 Getters               //
+    //               Getters                 //
     //---------------------------------------//
 
     function getApprovalCount(uint256 _taskId)
@@ -255,8 +263,6 @@ contract Todo {
     function getNumOfPartners() public view returns (uint256) {
         return authorised.length;
     }
-
-    // QmaP6wGiic5Z3csGJprx5DFFVvX5KhKBmSZsBmywQ9Ebr4
 
     function getTaskText(uint256 _taskId)
         public
